@@ -92,6 +92,16 @@
 	return sp;
 }
 
+- (SmartPayment*) createPaymentFromData:(NSData*)data
+{
+	NSString * code = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
+	if (code) {
+		return [self createPaymentFromCode:code];
+	}
+	[self setupError:SmartPaymentError_EncodingError str:@"Unable to create unicode string from Latin-1 data."];
+	return nil;
+}
+
 #pragma mark - Public API
 
 - (NSDictionary*) paymentAttributesFromCode:(NSString*)code
@@ -113,7 +123,6 @@
 	}
 	if (![[keyValues objectAtIndex:1] isEqualToString:kSmartPayment_Version]) {
 		// Unknown version
-		// TODO: make this check better
 		[self setupError:SmartPaymentError_UnsupportedVersion str:[NSString stringWithFormat:@"Unknown SmartPayment version %@", [keyValues objectAtIndex:1]]];
 		return nil;
 	}
@@ -142,8 +151,7 @@
 		value = [value stringByReplacingOccurrencesOfString:@"+" withString:@" "];
 		value = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 		if (value.length == 0) {
-			[self setupError:SmartPaymentError_NotAPayment str:[NSString stringWithFormat:@"Key '%@' has empty value", key]];
-			return nil;
+			continue;
 		}
 		
 		[resultDictionary setObject:value forKey:key];
@@ -184,6 +192,12 @@
 {
 	SmartPaymentReader * reader = [[SmartPaymentReader alloc] initWithConfiguration:configuration];
 	return [reader createPaymentFromCode:code];
+}
+
++ (id) smartPaymentWithData:(NSData*)data configuration:(SmartPaymentConfiguration*)configuration
+{
+	SmartPaymentReader * reader = [[SmartPaymentReader alloc] initWithConfiguration:configuration];
+	return [reader createPaymentFromData:data];
 }
 
 @end
