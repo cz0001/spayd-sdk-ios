@@ -49,6 +49,7 @@ The basic usage is very simple:
 
 ```
 #import "SmartPaymentCZ.h"
+#import "SmartPaymentReader.h"
 
 NSString * yourQRCode = @"SPD*1.0*ACC:CZ5855000000001265098001*AM:480.50*CC:CZK*RF:7004139146*X-VS:1234567890*DT:20120524*MSG:PLATBA ZA ZBOZI";
 
